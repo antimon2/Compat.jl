@@ -261,3 +261,9 @@ end
 @test isdiag(diagm([1,2,3,4]))
 @test !isdiag([1 2; 3 4])
 @test isdiag(5)
+
+# Cstring
+let s = "foo", w = wstring("foo")
+    @test Compat.unsafe_convert(Cstring, s) == pointer(s)
+    @test Compat.unsafe_convert(Cwstring, w) == pointer(w)
+end
