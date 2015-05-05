@@ -141,7 +141,8 @@ end
 function rewrite_split(ex, f)
     limit = nothing
     keep = nothing
-    for i in 4:length(ex.args)
+    args = Any[]
+    for i in 2:length(ex.args)
         if isexpr(ex.args[i], :kw)
             kw = ex.args[i].args
             if kw[1] == :limit
@@ -149,19 +150,32 @@ function rewrite_split(ex, f)
             elseif kw[1] == :keep
                 keep = kw[2]
             end
+        elseif isexpr(ex.args[i], :parameters)
+            for param in ex.args[i].args
+                if isexpr(param, :kw)
+                    kw = param.args
+                    if kw[1] == :limit
+                        limit = kw[2]
+                    elseif kw[1] == :keep
+                        keep = kw[2]
+                    end
+                end
+            end
+        else
+            push!(args, ex.args[i])
         end
     end
     if limit == nothing
         if keep == nothing
-            return Expr(:call, f, ex.args[2], ex.args[3])
+            return Expr(:call, f, args[1], args[2])
         else
-            return Expr(:call, f, ex.args[2], ex.args[3], keep)
+            return Expr(:call, f, args[1], args[2], keep)
         end
     else
         if keep == nothing
-            return Expr(:call, f, ex.args[2], ex.args[3], limit)
+            return Expr(:call, f, args[1], args[2], limit)
         else
-            return Expr(:call, f, ex.args[2], ex.args[3], limit, keep)
+            return Expr(:call, f, args[1], args[2], limit, keep)
         end
     end
 end
@@ -256,7 +270,7 @@ function _compat(ex::Expr)
         f = ex.args[1]
         if VERSION < v"0.4.0-dev+980" && (f == :Dict || (isexpr(f, :curly) && length(f.args) == 3 && f.args[1] == :Dict))
             ex = rewrite_dict(ex)
-        elseif VERSION < v"0.4.0-dev+129" && (f == :split || f == :rsplit) && length(ex.args) >= 4 && isexpr(ex.args[4], :kw)
+        elseif VERSION < v"0.4.0-dev+129" && (f == :split || f == :rsplit) && length(ex.args) >= 4 && (isexpr(ex.args[2], :parameters) || isexpr(ex.args[4], :kw))
             ex = rewrite_split(ex, f)
         elseif VERSION < v"0.4.0-dev+3732" && haskey(calltypes, f) && length(ex.args) > 1
             T = ex.args[1]

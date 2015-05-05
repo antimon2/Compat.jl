@@ -56,11 +56,19 @@ ns = length(d.slots)
 @test @compat split("a,b,,c", ',', limit=2,keep=true) == ["a", "b,,c"]
 @test @compat split("a,b,,c", ',', keep=false) == ["a", "b", "c"]
 @test @compat split("a,b,,c", ',', keep=true) == ["a", "b", "", "c"]
+@test @compat split("a,b,,c", ','; limit=2) == ["a", "b,,c"]
+@test @compat split("a,b,,c", ','; limit=2,keep=true) == ["a", "b,,c"]
+@test @compat split("a,b,,c", ','; keep=false) == ["a", "b", "c"]
+@test @compat split("a,b,,c", ','; keep=true) == ["a", "b", "", "c"]
 
 @test @compat rsplit("a,b,,c", ',', limit=2) == ["a,b,", "c"]
 @test @compat rsplit("a,b,,c", ',', limit=2,keep=true) == ["a,b,", "c"]
 @test @compat rsplit("a,b,,c", ',', keep=false) == ["a", "b", "c"]
 @test @compat rsplit("a,b,,c", ',', keep=true) == ["a", "b", "", "c"]
+@test @compat rsplit("a,b,,c", ','; limit=2) == ["a,b,", "c"]
+@test @compat rsplit("a,b,,c", ','; limit=2,keep=true) == ["a,b,", "c"]
+@test @compat rsplit("a,b,,c", ','; keep=false) == ["a", "b", "c"]
+@test @compat rsplit("a,b,,c", ','; keep=true) == ["a", "b", "", "c"]
 
 if VERSION < v"0.4.0-dev+1387"
     @test isdefined(Main, :AbstractString)
